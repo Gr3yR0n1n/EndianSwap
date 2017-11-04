@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #define bswap_16(value) \
 ((((value) & 0xff) << 8) | ((value) >> 8))
