@@ -55,7 +55,7 @@ int swapFile(char *input_file, char *output_file, enum swap_type swap_type) {
   FILE *input_fh = NULL, *output_fh = NULL;
   uint32_t current_dword;
   uint16_t current_word;
-  int file_size, ret;
+  int file_size;
 
   input_fh = fopen(input_file, "rb");
   if (!input_fh) {
@@ -81,27 +81,27 @@ int swapFile(char *input_file, char *output_file, enum swap_type swap_type) {
 
   while (!feof(input_fh)) {
     if (swap_type == SWAP32) {
-      ret = fread(&current_dword, sizeof(uint32_t), 1, input_fh);
-      if (ret != 4) {
+      fread(&current_dword, sizeof(uint32_t), 1, input_fh);
+      if (ferror(input_fh)) {
 	goto rw_error;
       }
 
       current_dword = bswap32(current_dword);
       
-      ret = fwrite(&current_dword, sizeof(uint32_t), 1, output_fh);
-      if (ret != 4) {
+      fwrite(&current_dword, sizeof(uint32_t), 1, output_fh);
+      if (ferror(output_fh)) {
 	goto rw_error;
       }
     } else if (swap_type == SWAP16) {
-      ret = fread(&current_word, sizeof(uint16_t), 1, input_fh);
-      if (ret != 2) {
+      fread(&current_word, sizeof(uint16_t), 1, input_fh);
+      if (ferror(input_fh)) {
 	goto rw_error;
       }
 
       current_word = bswap16(current_word);
 
-      ret = fwrite(&current_word, sizeof(uint16_t), 1, output_fh);
-      if (ret != 2) {
+      fwrite(&current_word, sizeof(uint16_t), 1, output_fh);
+      if (ferror(output_fh)) {
 	goto rw_error;
       }
     }
@@ -132,6 +132,7 @@ int swapFile(char *input_file, char *output_file, enum swap_type swap_type) {
   
  rw_error:
   fprintf(stderr, "Read/write error\n");
+  perror("");
   fclose(input_fh);
   fclose(output_fh);
   return -3;
